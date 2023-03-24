@@ -1,0 +1,94 @@
+name: chocolatine
+
+env:
+  MIRROR_URL: ${{ secrets.MIRROR_URL }}
+  EXECUTABLES: "choco"
+  ARGUMENTS: ""
+
+on:
+  push:
+    branches-ignore:
+    - "ga-ignore-*"
+  pull_request:
+    branches-ignore:
+    - "ga-ignore-*"
+
+jobs:
+  # Verif coding:
+  check_coding_style:
+    name: "🕵️‍♀️ Check the Coding_Style 🕵️‍♀️"
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/epitech/coding-style-checker:latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3.4.0
+      - name: Check coding style # voir PQ check.sh is not start #
+        run: check.sh $(pwd) $(pwd)
+      - name: Display errors as annotations
+        uses: actions/upload-artifact@v3.1.2
+        if: always()
+        with:
+          name: Check Results
+          path: checkstyle-result.xml
+      - name: Fail if there are errors
+        run: |
+          if [ -s checkstyle-result.xml ]
+          then
+            echo "Errors found"
+            exit 1
+          fi
+      - name: List files # PRINT file #
+        run: ls -R
+
+  # Verif compil:
+  check_program_compilation:
+      needs: [check_coding_style]
+      name: "🔨 Check program compilation 🔨"
+      runs-on: ubuntu-latest
+      container:
+        image: epitechcontent/epitest-docker:latest
+      steps:
+        - uses: actions/checkout@v3
+        - id: check_compil
+          run: make
+          timeout-minutes: 2
+        - run: make clean
+        - run: |
+            OIFS=$IFS
+            IFS=','
+            for x in $EXECUTABLES
+              do
+                ./$x $ARGUMENTS
+              done
+            IFS=$OIFS
+  # Tests criterion:
+  run_tests:
+    needs: [check_program_compilation]
+    name: "📝 Run criterion tests 📝"
+    runs-on: ubuntu-latest
+    container:
+      image: epitechcontent/epitest-docker:latest
+    steps:
+      - uses: actions/checkout@v3
+      - id: run_tests
+        run: make tests_run
+        timeout-minutes: 2
+  # Mirror:
+  push_to_mirror:
+    needs: [run_tests]
+    name: "🪞 Push to mirror 🪞"
+    if: ${{ github.event_name == 'push' }}
+    name: "🪞 Push all files to mirror specified 🪞"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: pixta-dev/repository-mirroring-action@v1
+        with:
+          target_repo_url:
+            ${{ env.MIRROR_URL }}
+          ssh_private_key:
+            ${{ secrets.GIT_SSH_PRIVATE_KEY }}
+
