@@ -23,6 +23,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3.4.0
+      - name: Display error log file details
+        run: ls -l coding-style-reports.log
       - name: Check coding style
         run: |
           ./check.sh $(pwd) $(pwd) > coding-style-reports.log 2>&1 || true
