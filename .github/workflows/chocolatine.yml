@@ -1,7 +1,7 @@
 name: chocolatine
 
 env:
-  MIRROR_URL: "git@github.com:EpitechPromo2027/B-DOP-200-LIL-2-1-chocolatine-romain.collignon.git"
+  MIRROR_URL: "git@github.com:romaincollignon/chocolatine.git"
   EXECUTABLES: "choco"
   ARGUMENTS: ""
 
@@ -91,4 +91,3 @@ jobs:
             ${{ env.MIRROR_URL }}
           ssh_private_key:
             ${{ secrets.GIT_SSH_PRIVATE_KEY }}
-
