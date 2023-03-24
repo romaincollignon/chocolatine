@@ -16,6 +16,7 @@ on:
 jobs:
   # Verif coding:
   check_coding_style:
+    name: "Annotations"
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/epitech/coding-style-checker:latest
@@ -24,7 +25,7 @@ jobs:
         uses: actions/checkout@v3.4.0
       - name: Check coding style
         run: |
-          ./check.sh $(pwd) $(pwd) > coding-style-reports.log 2>&1 || true
+          ./check.sh $(pwd) $(pwd)
       - name: Display error log file details
         run: ls -l coding-style-reports.log
       - name: Display errors as annotations
