@@ -16,7 +16,6 @@ on:
 jobs:
   # Verif coding:
   check_coding_style:
-    name: "Annotations"
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/epitech/coding-style-checker:latest
