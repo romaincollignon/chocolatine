@@ -23,14 +23,22 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3.4.0
-      - name: Check coding style # voir PQ check.sh is not start #
-        run: check.sh $(pwd) $(pwd)
+      - name: Check coding style
+        run: |
+          ./check.sh $(pwd) $(pwd) > coding-style-reports.log 2>&1 || true
       - name: Display errors as annotations
-        uses: actions/upload-artifact@v3.1.2
         if: always()
-        with:
-          name: Check Results
-          path: coding-style-reports.log
+        run: |
+          while IFS= read -r line; do
+            if [[ $line =~ (.+):([0-9]+):([0-9]+):\ (.+) ]]; then
+              file=${BASH_REMATCH[1]}
+              line_number=${BASH_REMATCH[2]}
+              message=${BASH_REMATCH[4]}
+              category=$(echo "$message" | awk -F'-' '{print $1}')
+              code=$(echo "$message" | awk -F'-' '{print $2}')
+              echo "::warning file=$file,line=$line_number:: $category coding style error:$file#L$line_number $code"
+            fi
+          done < coding-style-reports.log
       - name: Fail if there are errors
         run: |
           if [ -s coding-style-reports.log ]
@@ -38,8 +46,7 @@ jobs:
             echo "Errors found"
             exit 1
           fi
-      - name: List files # PRINT THE file #
-        run: ls -R
+        shell: bash
 
   # Verif compil:
   check_program_compilation:
