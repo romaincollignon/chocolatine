@@ -79,7 +79,6 @@ jobs:
     needs: [run_tests]
     name: "🪞 Push to mirror 🪞"
     if: ${{ github.event_name == 'push' }}
-    name: "🪞 Push all files to mirror specified 🪞"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
