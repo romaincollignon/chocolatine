@@ -31,11 +31,9 @@ jobs:
       - name: Display errors as annotations
         if: always()
         run: |
-          set -e
-          echo "coucou"
           while IFS= read -r line; do
-           if [[ $line =~ ^(MINOR|MAJOR|)$ ]]; then
-              echo "coucouuu"
+            if [[ $line =~ ^(MINOR|MAJOR|WARNING):([^:]+):([0-9]+):(.+):(.+)$ ]]; then
+              echo "euh"
               file="${BASH_REMATCH[2]}"
               line_number="${BASH_REMATCH[3]}"
               message="${BASH_REMATCH[4]}"
