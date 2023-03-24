@@ -33,11 +33,12 @@ jobs:
         run: |
           set -e
           while IFS= read -r line; do
-            if [[ $line =~ ^(MINOR|NORMAL|WARNING):(.+):([[:digit:]]+):(.+)$ ]]; then
+            if [[ $line =~ ^(MINOR|NORMAL|WARNING):(.+):([[:digit:]]+):(.+):(.+)$ ]]; then
               file="${BASH_REMATCH[2]}"
               line_number="${BASH_REMATCH[3]}"
               message="${BASH_REMATCH[4]}"
-              annotation="[${BASH_REMATCH[1]} coding style error] ${message}"
+              error_code="${BASH_REMATCH[5]}"
+              annotation="[${BASH_REMATCH[1]} coding style error] ${message} (${error_code})"
               echo "::error file=${file},line=${line_number}::${annotation}"
             fi
           done < coding-style-reports.log
