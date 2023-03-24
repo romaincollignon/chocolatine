@@ -33,7 +33,7 @@ jobs:
         run: |
           set -e
           while IFS= read -r line; do
-            if [[ $line =~ ^(MINOR|NORMAL|WARNING):(.+):([[:digit:]]+):(.+):(.+)$ ]]; then
+           if [[ $line =~ ^(MINOR|MAJOR|)$ ]]; then
               file="${BASH_REMATCH[2]}"
               line_number="${BASH_REMATCH[3]}"
               message="${BASH_REMATCH[4]}"
