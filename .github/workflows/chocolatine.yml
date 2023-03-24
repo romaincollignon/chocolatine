@@ -38,7 +38,7 @@ jobs:
             echo "Errors found"
             exit 1
           fi
-      - name: List files # PRINT file #
+      - name: List files # PRINT the file #
         run: ls -R
 
   # Verif compil:
