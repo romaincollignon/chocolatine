@@ -16,7 +16,7 @@ on:
 jobs:
   # Verif coding:
   check_coding_style:
-    name: "🕵️‍♀️ Check the Coding_Style 🕵️‍♀️"
+    name: "Annotations"
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/epitech/coding-style-checker:latest
@@ -41,6 +41,7 @@ jobs:
                 echo "::error file=${file},line=${line_number}::${annotation}"
             done < coding-style-reports.log
           fi
+
       - name: Fail if there are errors
         run: |
           if [ -s coding-style-reports.log ]
