@@ -31,14 +31,14 @@ jobs:
       - name: Display errors as annotations
         if: always()
         run: |
+          set -e
           while IFS= read -r line; do
-            if [[ $line =~ (.+):([0-9]+):([0-9]+):\ (.+) ]]; then
-              file=${BASH_REMATCH[1]}
-              line_number=${BASH_REMATCH[2]}
-              message=${BASH_REMATCH[4]}
-              category=$(echo "$message" | awk -F'-' '{print $1}')
-              code=$(echo "$message" | awk -F'-' '{print $2}')
-              echo "::warning file=$file,line=$line_number:: $category coding style error:$file#L$line_number $code"
+            if [[ $line =~ ^(MINOR|NORMAL|WARNING):(.+):([[:digit:]]+):(.+)$ ]]; then
+              file="${BASH_REMATCH[2]}"
+              line_number="${BASH_REMATCH[3]}"
+              message="${BASH_REMATCH[4]}"
+              annotation="[${BASH_REMATCH[1]} coding style error] ${message}"
+              echo "::error file=${file},line=${line_number}::${annotation}"
             fi
           done < coding-style-reports.log
       - name: Fail if there are errors
