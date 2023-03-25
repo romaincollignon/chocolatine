@@ -47,10 +47,6 @@ jobs:
               echo "::error title=${annotation},file=${file},line=${line_number}::${description}"
             done < coding-style-reports.log
           fi
-
-
-      - name: Fail if there are errors
-        run: |
           if [ -s coding-style-reports.log ]
           then
             exit 1
