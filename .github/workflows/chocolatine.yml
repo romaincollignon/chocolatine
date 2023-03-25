@@ -14,9 +14,8 @@ on:
     - "ga-ignore-*"
 
 jobs:
-  # Verif coding:
   check_coding_style:
-    name: "🕵️‍♀️ Check the Coding_Style 🕵️‍♀️"
+    name: "🕵️‍♀️ Check the Coding_Style 🕵️"
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/epitech/coding-style-checker:latest
@@ -29,22 +28,23 @@ jobs:
       - name: Display error log file details
         run: ls -l coding-style-reports.log
       - name: Display errors as annotations
-        if [ -s coding-style-reports.log ]; then
-          while IFS= read -r line || [ -n "$line" ]; do
-            file="$(echo "$line" | cut -d ':' -f 1)"
-            line_number="$(echo "$line" | cut -d ':' -f 2)"
-            error_level="$(echo "$line" | cut -d ':' -f 3)"
-            error_type="$(echo "$line" | cut -d ':' -f 4)"
-            if [ -n "$file" ] && [ -n "$line_number" ] && [ -n "$error_level" ] && [ -n "$error_type" ]; then
+        if: always()
+        run: |
+          if [ -f coding-style-reports.log ]; then
+            while IFS= read -r line; do
+              file="$(echo "$line" | cut -d ':' -f 1)"
+              line_number="$(echo "$line" | cut -d ':' -f 2)"
+              error_level="$(echo "$line" | cut -d ':' -f 3)"
+              error_type="$(echo "$line" | cut -d ':' -f 4)"
               annotation="${error_level} coding style error: ${error_type}"
               echo "::error file=${file},line=${line_number}::${annotation}"
-            fi
-          done < coding-style-reports.log
-        fi
+            done < coding-style-reports.log
+          fi
       - name: Fail if there are errors
         run: |
           if [ -s coding-style-reports.log ]
           then
+            echo "Errors found"
             exit 1
           fi
         shell: bash
