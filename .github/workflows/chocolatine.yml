@@ -46,9 +46,11 @@ jobs:
               description="$(echo "$line" | cut -d ':' -f 4)"
               echo "::error title=${annotation},file=${file},line=${line_number}::${description}"
             done < coding-style-reports.log
-            set +e
-            exit 0
           fi
+      - name: Exit with non-zero status if coding style errors
+        if: ${{ failure() }}
+        run: exit 1
+
 
       # - name: Fail if there are errors
       #   run: |
