@@ -15,24 +15,46 @@ on:
 
 jobs:
   check_coding_style:
+    name: "🕵️‍♀️ Check the Coding_Style 🕵️"
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/epitech/coding-style-checker:latest
-
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v3.4.0
+      - name: Check coding style
+        run: |
+          check.sh $(pwd) $(pwd) 2>&1 | tee coding_style_errors.log
+      - name: Display error log file details
+        run: ls -l coding-style-reports.log
+      - name: Display contents of coding-style-reports.log
+        run: |
+          if [ -f coding-style-reports.log ]; then
+            cat coding-style-reports.log
+          else
+            echo "File coding-style-reports.log not found."
+          fi
+      - name: Display errors as annotations
+        if: always()
+        run: |
+          if [ -f coding-style-reports.log ]; then
+            while IFS= read -r line; do
+              file="$(echo "$line" | cut -d ':' -f 1)"
+              line_number="$(echo "$line" | cut -d ':' -f 2)"
+              error_type="$(echo "$line" | cut -d ':' -f 3)"
+              annotation="${error_type} coding style error: ${file}#L${line_number}"
+              echo "::error file=${file},line=${line_number}::${annotation}"
+            done < coding-style-reports.log
+          fi
 
-    - name: Run coding style checker
-      run: |
-        check.sh $(pwd) $(pwd) 2>&1 | tee coding_style_errors.txt
-        echo "::set-output name=number_of_errors::$(grep -c 'Error' coding_style_errors.txt)"
-        cat coding_style_errors.txt | awk -F: '/Error/ { print "::error file=" $1 ",line=" $2 ",col=" $3 "::" $4 }'
-      id: check_coding_style_output
-
-    - name: Fail if there are any coding style errors
-      if: steps.check_coding_style_output.outputs.number_of_errors > 0
-      run: exit 1
+      - name: Fail if there are errors
+        run: |
+          if [ -s coding-style-reports.log ]
+          then
+            echo "Errors found"
+            exit 1
+          fi
+        shell: bash
 
   # Verif compil:
   check_program_compilation:
