@@ -33,12 +33,14 @@ jobs:
         run: |
           if [ -f coding-style-reports.log ]; then
             while IFS= read -r line; do
+              if [ ! -z "$line" ] && [[ "$line" =~ .+:.+:[[:digit:]]+:.+ ]]; then
                 file="$(echo "$line" | cut -d ':' -f 1)"
                 line_number="$(echo "$line" | cut -d ':' -f 2)"
-                message="$(echo "$line" | cut -d ':' -f 3)"
-                error_code="$(echo "$line" | cut -d ':' -f 4)"
-                annotation="${message}"
+                error_level="$(echo "$line" | cut -d ':' -f 1)"
+                error_type="$(echo "$line" | cut -d ':' -f 4)"
+                annotation="[${error_level} coding style error] ${error_type}"
                 echo "::error file=${file},line=${line_number}::${annotation}"
+              fi
             done < coding-style-reports.log
           fi
 
