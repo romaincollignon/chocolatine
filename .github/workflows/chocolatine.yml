@@ -46,12 +46,17 @@ jobs:
               description="$(echo "$line" | cut -d ':' -f 4)"
               echo "::error title=${annotation},file=${file},line=${line_number}::${description}"
             done < coding-style-reports.log
-          fi
-          if [ -s coding-style-reports.log ]
-          then
             exit 1
           fi
-        shell: bash
+
+      # - name: Fail if there are errors
+      #   run: |
+      #     if [ -s coding-style-reports.log ]
+      #     then
+      #       echo "Errors found"
+      #       exit 1
+      #     fi
+      #   shell: bash
 
   # Verif compil:
   check_program_compilation:
