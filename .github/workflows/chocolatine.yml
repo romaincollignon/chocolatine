@@ -35,10 +35,10 @@ jobs:
             while IFS= read -r line; do
               file="$(echo "$line" | cut -d ':' -f 1)"
               line_number="$(echo "$line" | cut -d ':' -f 2)"
-              error_level="$(echo "$line" | cut -d ':' -f 1)"
+              error_level="$(echo "$line" | cut -d ':' -f 3)"
               error_type="$(echo "$line" | cut -d ':' -f 4)"
-              annotation="[${error_level} coding style error] ${error_type}"
               echo "::error file=${file},line=${line_number}::${annotation}"
+              annotation="${error_level} coding style error: ${error_type}"
             done < coding-style-reports.log
           fi
 
