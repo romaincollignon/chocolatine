@@ -37,7 +37,7 @@ jobs:
                 line_number="$(echo "$line" | cut -d ':' -f 2)"
                 message="$(echo "$line" | cut -d ':' -f 3)"
                 error_code="$(echo "$line" | cut -d ':' -f 4)"
-                annotation="[${error_code}] ${message}"
+                annotation="${message}"
                 echo "::error file=${file},line=${line_number}::${annotation}"
             done < coding-style-reports.log
           fi
@@ -46,7 +46,6 @@ jobs:
         run: |
           if [ -s coding-style-reports.log ]
           then
-            echo "Errors found"
             exit 1
           fi
         shell: bash
