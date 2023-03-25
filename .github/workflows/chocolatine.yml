@@ -42,9 +42,9 @@ jobs:
               file="$(echo "$line" | cut -d ':' -f 1)"
               line_number="$(echo "$line" | cut -d ':' -f 2)"
               error_type="$(echo "$line" | cut -d ':' -f 3)"
-              annotation="${error_type} coding style error: ${file}#L${line_number}"
+              annotation="${error_type} coding style error: "
               description="$(echo "$line" | cut -d ':' -f 4)"
-              echo "::error title=${annotation},file=${file},line=::${description}"
+              echo "::error title=${annotation},file=${file},line=${line_number}::${description}"
             done < coding-style-reports.log
           fi
 
