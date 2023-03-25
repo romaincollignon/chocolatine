@@ -37,9 +37,10 @@ jobs:
               error_level="$(echo "$line" | cut -d ':' -f 3)"
               error_type="$(echo "$line" | cut -d ':' -f 4)"
               annotation="${error_level} coding style error: ${error_type}"
-              echo "::error file=${file},line=${line_number}::${annotation}"
+              echo "::error title=${annotation},file=${file},line=${line_number}::${error_type}"
             done < coding-style-reports.log
           fi
+
       - name: Fail if there are errors
         run: |
           if [ -s coding-style-reports.log ]
