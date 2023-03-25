@@ -29,21 +29,18 @@ jobs:
       - name: Display error log file details
         run: ls -l coding-style-reports.log
       - name: Display errors as annotations
-        if: always()
-        run: |
-          if [ -f coding-style-reports.log ]; then
-              while IFS= read -r line; do
-                  if [[ $line =~ ^([^:]+):([[:digit:]]+):(MINOR|MAJOR):(.+)$ ]]; then
-                      file="${BASH_REMATCH[1]}"
-                      line_number="${BASH_REMATCH[2]}"
-                      error_level="${BASH_REMATCH[3]}"
-                      error_type="${BASH_REMATCH[4]}"
-                      annotation="${error_type} coding style error: ${file}#L${line_number}"
-                      echo "::error file=${file},line=${line_number}::${annotation}"
-                  fi
-              done < coding-style-reports.log
-          fi
-
+        if [ -s coding-style-reports.log ]; then
+          while IFS= read -r line || [ -n "$line" ]; do
+            file="$(echo "$line" | cut -d ':' -f 1)"
+            line_number="$(echo "$line" | cut -d ':' -f 2)"
+            error_level="$(echo "$line" | cut -d ':' -f 3)"
+            error_type="$(echo "$line" | cut -d ':' -f 4)"
+            if [ -n "$file" ] && [ -n "$line_number" ] && [ -n "$error_level" ] && [ -n "$error_type" ]; then
+              annotation="${error_level} coding style error: ${error_type}"
+              echo "::error file=${file},line=${line_number}::${annotation}"
+            fi
+          done < coding-style-reports.log
+        fi
       - name: Fail if there are errors
         run: |
           if [ -s coding-style-reports.log ]
