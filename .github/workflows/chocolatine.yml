@@ -32,14 +32,16 @@ jobs:
         if: always()
         run: |
           if [ -f coding-style-reports.log ]; then
-            while IFS= read -r line; do
-              file="$(echo "$line" | cut -d ':' -f 1)"
-              line_number="$(echo "$line" | cut -d ':' -f 2)"
-              error_level="$(echo "$line" | cut -d ':' -f 3)"
-              error_type="$(echo "$line" | cut -d ':' -f 4)"
-              echo "::error file=${file},line=${line_number}::${annotation}"
-              annotation="${error_level} coding style error: ${error_type}"
-            done < coding-style-reports.log
+              while IFS= read -r line; do
+                  if [[ $line =~ ^([^:]+):([[:digit:]]+):(MINOR|MAJOR):(.+)$ ]]; then
+                      file="${BASH_REMATCH[1]}"
+                      line_number="${BASH_REMATCH[2]}"
+                      error_level="${BASH_REMATCH[3]}"
+                      error_type="${BASH_REMATCH[4]}"
+                      annotation="${error_type} coding style error: ${file}#L${line_number}"
+                      echo "::error file=${file},line=${line_number}::${annotation}"
+                  fi
+              done < coding-style-reports.log
           fi
 
       - name: Fail if there are errors
