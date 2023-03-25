@@ -25,8 +25,6 @@ jobs:
       - name: Check coding style
         run: |
           check.sh $(pwd) $(pwd) 2>&1 | tee coding_style_errors.log
-      - name: Display error log file details
-        run: ls -l coding-style-reports.log
       - name: Display contents of coding-style-reports.log
         run: |
           if [ -f coding-style-reports.log ]; then
@@ -47,19 +45,15 @@ jobs:
               echo "::error title=${annotation},file=${file},line=${line_number}::${description}"
             done < coding-style-reports.log
           fi
-      - name: Exit with non-zero status if coding style errors
-        if: ${{ failure() }}
-        run: exit 1
 
-
-      # - name: Fail if there are errors
-      #   run: |
-      #     if [ -s coding-style-reports.log ]
-      #     then
-      #       echo "Errors found"
-      #       exit 1
-      #     fi
-      #   shell: bash
+      - name: Fail if there are errors
+        run: |
+          if [ -s coding-style-reports.log ]
+          then
+            echo "Errors found"
+            exit 1
+          fi
+        shell: bash
 
   # Verif compil:
   check_program_compilation:
