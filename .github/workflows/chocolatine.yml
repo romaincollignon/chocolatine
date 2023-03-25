@@ -27,6 +27,13 @@ jobs:
           ./check.sh $(pwd) $(pwd) > coding-style-reports.log 2>&1 || true
       - name: Display error log file details
         run: ls -l coding-style-reports.log
+      - name: Display contents of coding-style-reports.log
+        run: |
+          if [ -f coding-style-reports.log ]; then
+            cat coding-style-reports.log
+          else
+            echo "File coding-style-reports.log not found."
+          fi
       - name: Display errors as annotations
         if: always()
         run: |
