@@ -11,5 +11,4 @@
 int main(int ac, char **av)
 {
     printf("test ! \n");
-    // OHH il y a du coding moche là
 }
