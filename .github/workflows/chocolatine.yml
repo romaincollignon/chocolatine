@@ -1,10 +1,8 @@
 name: chocolatine
-
 env:
   MIRROR_URL: "git@github.com:romaincollignon/chocolatine.git"
   EXECUTABLES: "choco"
   ARGUMENTS: ""
-
 on:
   push:
     branches-ignore:
@@ -12,7 +10,6 @@ on:
   pull_request:
     branches-ignore:
     - "ga-ignore-*"
-
 jobs:
   check_coding_style:
     name: "🕵️‍♀️ Check the Coding_Style 🕵️"
@@ -45,7 +42,6 @@ jobs:
               echo "::error title=${annotation},file=${file},line=${line_number}::${description}"
             done < coding-style-reports.log
           fi
-
       - name: Display errors as annotations with links
         if: always()
         run: |
@@ -60,7 +56,6 @@ jobs:
               echo "::error title=${annotation},file=${file},line=${line_number},${file_url}::${description}"
             done < coding-style-reports.log
           fi
-
       - name: Fail if there are errors
         run: |
           if [ -s coding-style-reports.log ]
@@ -69,7 +64,6 @@ jobs:
             exit 1
           fi
         shell: bash
-
   # Verif compil:
   check_program_compilation:
       needs: [check_coding_style]
