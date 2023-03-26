@@ -39,9 +39,8 @@ jobs:
               error_type="$(echo "$line" | cut -d ':' -f 3)"
               annotation="${error_type} coding style error"
               description="$(echo "$line" | cut -d ':' -f 4)"
-              echo "::error title=${annotation},file=${file},line=${line_number}::${description}
               file_url="https://github.com/${{ github.repository }}/blob/${{ github.sha }}/${file}#L${line_number}"
-              echo "::set-file-comment checkstyle::${file_url}"
+              echo "::error title=${annotation},file=${file},line=${line_number},${file_url}::${description}"
             done < coding-style-reports.log
           fi
       - name: Fail if there are errors
