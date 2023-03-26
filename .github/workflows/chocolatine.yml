@@ -34,6 +34,7 @@ jobs:
         run: |
           check.sh $(pwd) $(pwd) 2>&1 | tee coding_style_errors.log
           if [ -s coding-style-reports.log ]; then
+            annotations=""
             while IFS= read -r line; do
               file="$(echo "$line" | cut -d ':' -f 1)"
               line_number="$(echo "$line" | cut -d ':' -f 2)"
@@ -41,13 +42,16 @@ jobs:
               annotation="${error_type} coding style error"
               description="$(echo "$line" | cut -d ':' -f 4)"
               file_url="https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_SHA}/${file}#L${line_number}"
-              echo "::error title=${annotation},file=${file},line=${line_number}::${description}"
-              curl -sS -X POST -H "Authorization: token ${GITHUB_TOKEN}" \
-                -d "{\"body\": \"${annotation} found in [${file}:${line_number}](${file_url})\"}" \
-                "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${{ github.event.number }}/comments" > /dev/null
+              annotations+="::error title=${annotation},file=${file},line=${line_number}::${description}\n"
+              annotations+="\`${file}:${line_number}\`\n"
             done < coding-style-reports.log
+            echo -e "${annotations}" >&2
+            curl -sS -X POST -H "Authorization: token ${GITHUB_TOKEN}" \
+              -d "{\"body\": \"${annotations}\"}" \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${{ github.event.number }}/comments" > /dev/null
             exit 1
           fi
+
 
       - name: Fail if there are errors
         run: |
