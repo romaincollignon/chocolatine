@@ -29,27 +29,20 @@ jobs:
           else
             echo "File coding-style-reports.log not found."
           fi
-     - name: Check coding style and display errors
-      if: always()
-      run: |
-        check.sh $(pwd) $(pwd) 2>&1 | tee coding_style_errors.log
-        if [ -s coding-style-reports.log ]; then
-          annotations=""
-          while IFS= read -r line; do
-            file="$(echo "$line" | cut -d ':' -f 1)"
-            line_number="$(echo "$line" | cut -d ':' -f 2)"
-            error_type="$(echo "$line" | cut -d ':' -f 3)"
-            annotation="${error_type} coding style error"
-            description="$(echo "$line" | cut -d ':' -f 4)"
-            file_url="https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_SHA}/${file}#L${line_number}"
-            annotations+="::error title=${annotation},file=${file},line=${line_number}::{description} ([${file}:${line_number}](${file_url}))\n"
-          done < coding-style-reports.log
-          echo -e "${annotations}" | tee coding-style-annotations.log
-          exit 1
-        fi
-
-
-
+      - name: Display errors as annotations with links
+        if: always()
+        run: |
+          if [ -f coding-style-reports.log ]; then
+            while IFS= read -r line; do
+              file="$(echo "$line" | cut -d ':' -f 1)"
+              line_number="$(echo "$line" | cut -d ':' -f 2)"
+              error_type="$(echo "$line" | cut -d ':' -f 3)"
+              annotation="${error_type} coding style error"
+              description="$(echo "$line" | cut -d ':' -f 4)"
+              file_url="${{ github.server_url }}/${{ github.repository }}/${{ github.ref }}/$(echo "${file}" | sed 's|/|@|g')?${{ github.action }}-${{ github.run_id }}"
+              echo "::error title=${annotation},file=${file},line=${line_number},${file_url}::${description}"
+            done < coding-style-reports.log
+          fi
       - name: Fail if there are errors
         run: |
           if [ -s coding-style-reports.log ]
@@ -58,7 +51,6 @@ jobs:
             exit 1
           fi
         shell: bash
-
   # Verif compil:
   check_program_compilation:
       needs: [check_coding_style]
@@ -80,7 +72,6 @@ jobs:
                 ./$x $ARGUMENTS
               done
             IFS=$OIFS
-
   # Tests criterion:
   run_tests:
     needs: [check_program_compilation]
@@ -93,7 +84,6 @@ jobs:
       - id: run_tests
         run: make tests_run
         timeout-minutes: 2
-
   # Mirror:
   push_to_mirror:
     needs: [run_tests]
