@@ -29,10 +29,11 @@ jobs:
           else
             echo "File coding-style-reports.log not found."
           fi
-      - name: Display errors as annotations
+      - name: Check coding style and display errors
         if: always()
         run: |
-          if [ -f coding-style-reports.log ]; then
+          check.sh $(pwd) $(pwd) 2>&1 | tee coding_style_errors.log
+          if [ -s coding-style-reports.log ]; then
             while IFS= read -r line; do
               file="$(echo "$line" | cut -d ':' -f 1)"
               line_number="$(echo "$line" | cut -d ':' -f 2)"
@@ -41,25 +42,14 @@ jobs:
               description="$(echo "$line" | cut -d ':' -f 4)"
               echo "::error title=${annotation},file=${file},line=${line_number}::${description}"
               file_url="https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_SHA}/${file}#L${line_number}"
-              echo "::set-output name=file_url::${file_url}"
+              echo "File with error: $file, line: $line_number, URL: $file_url"
+              curl -X POST -H "Authorization: token ${GITHUB_TOKEN}" \
+                -d "{\"body\": \"${annotation} found in [${file}:${line_number}](${file_url})\"}" \
+                "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${{ github.event.number }}/comments"
             done < coding-style-reports.log
+            exit 1
           fi
-      - name: Comment on file with link to error
-        if: always()
-        uses: unsplash/comment-on-file-action@v1
-        with:
-          path: ${{ env.file }}
-          position: ${{ env.line_number }}
-          message: |
-            {{ env.error_type }} coding style error found.
-            {{ env.description }}
-            View on [GitHub](${{ env.file_url }}).
-        env:
-          file: ${{ github.event.inputs.file }}
-          line_number: ${{ github.event.inputs.line_number }}
-          error_type: ${{ github.event.inputs.error_type }}
-          description: ${{ github.event.inputs.description }}
-          file_url: ${{ steps.display-errors.outputs.file_url }}
+
       - name: Fail if there are errors
         run: |
           if [ -s coding-style-reports.log ]
