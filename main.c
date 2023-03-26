@@ -11,4 +11,13 @@
 int main(int ac, char **av)
 {
     printf("test ! \n");
+    // OHH il y a du coding moche là
+    if (1) {
+        if (1) {
+            if (1) {
+                return 0;
+            }
+        }
+    }
+    return 0;
 }
